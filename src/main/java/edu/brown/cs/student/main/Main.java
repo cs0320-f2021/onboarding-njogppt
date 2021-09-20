@@ -83,7 +83,7 @@ public final class Main {
 //          System.out.println(mathBot.add(arg1, arg2));
 //          System.out.println(mathBot.subtract(arg1, arg2));
 
-//----------------------------------------------------------------------------------------------------------------------//
+
           // parse the 2nd and 3rd values in argument into Doubles, if first is "add" or "subtract,"
           // do the appropriate operation with MathBot and print result
           if (arguments[0].equals("add")) { // add is first word
@@ -122,11 +122,11 @@ public final class Main {
                     name.substring(1, name.length() - 1));
                 // make new list
 
-                if (list != null) { // print star ID of each star in list
-                  for (Star star : list) {
+                if (list != null) { // name of star exists in database
+                  for (Star star : list) { // print star ID of each star in list
                     System.out.println(star.getStarID());
                   }
-                } else { // error
+                } else { // list is null
                   System.out.println("ERROR: Star with name " + name + " does not exist in the database");
                 }
               } else { // error b/c not properly wrapped in quotes
@@ -134,7 +134,7 @@ public final class Main {
               }
             }
           }
-//--------------------------------------------------------------------------------------------------------//
+
         } catch (Exception e) {
           e.printStackTrace();
           System.out.println("ERROR: We couldn't process your input");
@@ -147,7 +147,6 @@ public final class Main {
 
   }
 
-//---------------------------------------------------------------------------------------------------//
   /**
    * Method to read CSV and load star info into a list of stars
    * @param filename
@@ -233,34 +232,33 @@ public final class Main {
     }
 
     // create a TreeMap to hold distance to list of stars
-    Map<Float, List<Star>> distanceToStar = new TreeMap<>();
+    Map<Float, List<Star>> treeMapStarDistances = new TreeMap<>();
 
     // loop through stars, calculate distance from the coordinates, add into TreeMap with key
     // distance and value list of stars
     for (Star star : this.listOfStars) {
       float distance = star.calculateStarDistanceCoord(x, y, z);
 
-      if (distanceToStar.containsKey(distance)) {
-        List<Star> list = distanceToStar.get(distance);
-        list.add(star);
-      } else {
-        List<Star> list = new ArrayList<>();
-        list.add(star);
-        distanceToStar.put(distance, list);
+      if (treeMapStarDistances.containsKey(distance)) { // TM already contains a star at that exact distance
+        List<Star> list = treeMapStarDistances.get(distance); // get that list that contains that star
+        list.add(star); // add that star to the list
+      } else { // not already in TM
+        List<Star> list = new ArrayList<>(); // list contains all stars at that distance
+        list.add(star); // add star to list
+        treeMapStarDistances.put(distance, list); // add list to TM
       }
     }
 
-    List<Star> returnList = new ArrayList<>();
+    List<Star> returnList = new ArrayList<>(); // return this object later
 
     // while loop to add k stars to returnList
     while (returnList.size() < k) {
       // iterate through keys (which are sorted since it's in a TreeMap)
-      for (float distance : distanceToStar.keySet()) {
-        List<Star> stars = distanceToStar.get(distance);
+      for (float distance : treeMapStarDistances.keySet()) { // distance is keys
+        List<Star> stars = treeMapStarDistances.get(distance); // list of stars is value
 
-        // if adding all stars in list makes returnList's new size less than or equal to k,
-        // add all stars in the list
-        if (k >= (returnList.size() + stars.size())) {
+        // if adding all stars in list makes returnList's new size less than or equal to k, add all stars in the list
+        if (k >= (returnList.size() + stars.size())) { // aka if adding all stars at this distance not enough
           returnList.addAll(stars);
         } else {
           List<Star> listCopy = new ArrayList<>(stars);
@@ -269,14 +267,13 @@ public final class Main {
           // that need to be added for returnList to equal k
           int neededStars = k - size;
 
-          // get random stars from list, then delete star from copy and repeat until you get
-          // neededStars
-          for (int i = 0; i < neededStars; i++) {
+          // get random stars from list, then delete star from copy and repeat until you get neededStars
+          for (int i = 0; i < neededStars; i++) { // repeat for as many stars you need
             Random rand = new Random();
 
-            int randIndex = rand.nextInt(listCopy.size());
-            returnList.add(listCopy.get(randIndex));
-            listCopy.remove(randIndex);
+            int randIndex = rand.nextInt(listCopy.size()); // random index within list of stars at that distance
+            returnList.add(listCopy.get(randIndex)); // add that random star to returnList
+            listCopy.remove(randIndex); // remove that star from the list
           }
         }
       }
@@ -301,16 +298,14 @@ public final class Main {
       }
     }
 
-
-    if (inputStar != null) {
-      List<Star> list = naiveNeighbors(k + 1, inputStar.getX(), inputStar.getY(), inputStar.getZ());
-      list.remove(0);
+    if (inputStar != null) { // star was found
+      List<Star> list = naiveNeighbors(k + 1, inputStar.getX(), inputStar.getY(), inputStar.getZ()); // k + 1 accounts for the star itself
+      list.remove(0); // remove the star itself
       return list;
-    } else {
+    } else { // inputStar is null, no star with starName in listOfStars
       return null;
     }
   }
-//------------------------------------------------------------------------------------------------------------//
 
   private static FreeMarkerEngine createEngine() {
     Configuration config = new Configuration(Configuration.VERSION_2_3_0);

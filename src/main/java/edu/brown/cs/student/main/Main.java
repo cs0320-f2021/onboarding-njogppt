@@ -93,36 +93,43 @@ public final class Main {
             double difference = mathBot.subtract(Double.parseDouble(arguments[1]), Double.parseDouble(arguments[2]));
             System.out.println(difference);
           } else if (arguments[0].equals("stars")) { // stars is first word
-            listOfStars = loadStarInfo(arguments[1]);
-            System.out.println("Read " + listOfStars.size() + " stars from " + arguments[1]);
+            listOfStars = createStarList(arguments[1]); // create list of Star objects
+            System.out.println("Read " + listOfStars.size() + " stars from " + arguments[1]); // confirmation statement
           } else if (arguments[0].equals("naive_neighbors")) { // naive_neighbors is first word
             if (listOfStars == null) {
               System.out.println("ERROR: Load in star data first");
             }
 
-            if (arguments.length == 5) {
+            if (arguments.length == 5) { // naive_neighbors <k> <x> <y> <z> input
+
+              // turn # of stars input into integer, turn these x y z Strings into floats
               List<Star> list = naiveNeighbors(Integer.parseInt(arguments[1]),
                   Float.parseFloat(arguments[2]),
-                  Float.parseFloat(arguments[3]),
+                  Float.parseFloat(arguments[3]), // pass all of them in as arguments
                   Float.parseFloat(arguments[4]));
+              // make new list
 
-              for (Star star : list) {
+              for (Star star : list) { // print star ID of each star in list
                 System.out.println(star.getStarID());
               }
-            } else if (arguments.length == 3) {
-              String name = arguments[2];
-              if (name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"') {
+
+            } else if (arguments.length == 3) { // naive_neighbors <k> <“name”> input
+              String name = arguments[2]; // store name of input star in variable
+              if (name.charAt(0) == '"' && name.charAt(name.length() - 1) == '"') { // if name is properly wrapped in quotes
+
+                // turn # of stars input into integer, pass it and name w/out quotes in as arguments
                 List<Star> list = naiveNeighbors(Integer.parseInt(arguments[1]),
                     name.substring(1, name.length() - 1));
+                // make new list
 
-                if (list != null) {
+                if (list != null) { // print star ID of each star in list
                   for (Star star : list) {
                     System.out.println(star.getStarID());
                   }
-                } else {
+                } else { // error
                   System.out.println("ERROR: Star with name " + name + " does not exist in the database");
                 }
-              } else {
+              } else { // error b/c not properly wrapped in quotes
                 System.out.println("ERROR: Name must have quotations around it");
               }
             }
@@ -147,8 +154,8 @@ public final class Main {
    * @return List of stars
    * @throws Exception
    */
-  private static List<Star> loadStarInfo(String filename) throws Exception {
-    List<Star> returnList = new ArrayList<>();
+  private static List<Star> createStarList(String filename) throws Exception {
+    List<Star> listOfStars = new ArrayList<>();
 
     BufferedReader reader = new BufferedReader(new FileReader(filename));
     String line = reader.readLine();
@@ -162,12 +169,13 @@ public final class Main {
 
     // create stars out of lines and add to returnList
     while (line != null) {
-      returnList.add(createStar(line));
+      listOfStars.add(makeNewStar(line));
       line = reader.readLine();
     }
+
     reader.close();
 
-    return returnList;
+    return listOfStars; // return list of type Star
   }
 
   /**
@@ -190,7 +198,7 @@ public final class Main {
    * @return Star
    * @throws Exception
    */
-  private static Star createStar(String line) throws Exception {
+  private static Star makeNewStar(String line) throws Exception {
     String[] lineComponents = line.split(",");
 
     // checks if line has the correct number of components for a star
